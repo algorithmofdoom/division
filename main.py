@@ -1,28 +1,26 @@
-import webapp2
+"""`main` is the top level module for your Flask application."""
 
-class MainHandler(webapp2.RequestHandler):
+# Import the Flask Framework
+from flask import Flask
+app = Flask(__name__)
+# Note: We don't need to call run() since our application is embedded within
+# the App Engine WSGI application server.
 
-  from datetime import datetime, time
 
-  def get(self):  # pylint:disable-msg=invalid-name
-    """Handle GET requests."""
-    
-    def dateDiffInSeconds(date1, date2):
-      timedelta = date2 - date1
-      return timedelta.days * 24 * 3600 + timedelta.seconds
-    
-    def daysHoursMinutesSecondsFromSeconds(seconds):
-    	minutes, seconds = divmod(seconds, 60)
-    	hours, minutes = divmod(minutes, 60)
-    	days, hours = divmod(hours, 24)
-    	return (days, hours, minutes, seconds)
-    
-    leaving_date = datetime.strptime('2016-03-08 00:00:01', '%Y-%m-%d %H:%M:%S')
-    now = datetime.now()
+import divisioncountdown
 
-    self.response.write("%d days, %d hours, %d minutes, %d seconds" % daysHoursMinutesSecondsFromSeconds(dateDiffInSeconds(now, leaving_date)))
+@app.route('/')
 
-APP = webapp2.WSGIApplication([
-    ('/.*', MainHandler),
-], debug=True)
+def hello():
+    divisioncountdown.divcount()
 
+@app.errorhandler(404)
+def page_not_found(e):
+    """Return a custom 404 error."""
+    return 'Sorry, Nothing at this URL.', 404
+
+
+@app.errorhandler(500)
+def application_error(e):
+    """Return a custom 500 error."""
+    return 'Sorry, unexpected error: {}'.format(e), 500
